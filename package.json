@@ -1,0 +1,18 @@
+{
+  "name": "tagengine",
+  "version": "1.0.0",
+  "description": "Script to add tags from an excel file to database",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "post-level1": "node index.js",
+    "post-level2": "node level2.js"
+  },
+  "author": "Divyesh Parmar",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "node-fetch": "^2.6.1",
+    "read-excel-file": "^4.1.0"
+  }
+}
