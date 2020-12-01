@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "post-level1": "node index.js",
+    "post-level1": "node level1.js",
     "post-level2": "node level2.js"
   },
   "author": "Divyesh Parmar",
