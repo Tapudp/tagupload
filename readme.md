@@ -26,12 +26,14 @@ npm i or npm install
 
 ### run scripts
 
-- you can run scripts on your local or on your deplyoed AWS, Digital Ocean server just with following command
+- you can run scripts on your local or on your deplyoed AWS, Digital Ocean server just with following command, which is mentioned in the `package.json` file also, as npm scripts:
 
 ```
-node index.js
+yarn level1
 
 // or
 
-node level2.js
+yarn level2
 ```
+
+- use `npm run` if you don't have `yarn` installed on your machine.
