@@ -2,10 +2,11 @@ const xlsxFile = require("read-excel-file/node");
 const fetch = require("node-fetch");
 const colors = require("colors");
 const L1TagsUrl = "https://bff.airmeet.com/api/v1/tag/?tagType=LEVEL1";
-const postL2TagsUrl = "https://bff.airmeet.com/api/v1/tag";
+const L2TagsUrl = 'https://test-bff-2.airmeet.com/api/v1/tag/?tagType=LEVEL2';
+const postL2TagsUrl = "https://test-bff-2.airmeet.com/api/v1/tag";
 
 // the logic for reading Excel sheet
-let newL2Tags = xlsxFile("./newtags.xlsx", { sheet: "Level2" }).then(
+let newL2Tags = xlsxFile("./newtags.xlsx", { sheet: "Sheet6" }).then(
   (rows) => rows
 );
 // let newL1Tags = xlsxFile('./newtags.xlsx', { sheet: 'Sheet5' }).then(
@@ -28,11 +29,36 @@ const getL1Tags = async (url) => {
   }
 };
 
+const getL2Tags = async (url) => {
+  // console.log(
+  //   colors.bold.bgRed.yellow(
+  //     "first ... wait ... fetching Level-1 tags first..."
+  //   )
+  // );
+  try {
+    const response = await fetch(url);
+    const json = await response.json();
+    return json;
+  } catch (error) {
+    console.log("error in code for getL2Tags", error);
+  }
+};
+
+const verifyL2Tags = async (existingL2Tags) => {
+  let pureNewL2Tags = await newL2Tags;
+  pureNewL2Tags = pureNewL2Tags.filter(it => it[1] !== null);
+  // console.log('before verify', pureNewL2Tags)
+  existingL2Tags.forEach((e) => {
+    pureNewL2Tags.filter((it) => it[1] !== e.name);
+  });
+  return pureNewL2Tags;
+};
+
 const postL2Tags = async (url, dataToSend = []) => {
   // console.log(
   //   colors.bold.bgRed.yellow("third ... wait ... posting the Level-2 tags ... ")
   // );
-  console.log(dataToSend);
+  // console.log(dataToSend);
   try {
       const response = await fetch(url, { method: 'POST',
         body: JSON.stringify(dataToSend),
@@ -42,9 +68,9 @@ const postL2Tags = async (url, dataToSend = []) => {
         'x-accesstoken': 'veldanda'
        }
     });
+    console.log("response is ", response);
     if (response.status === 200) {
       // response.headers.forEach((header) => console.log('hit the bff api', header));
-      console.log("response is ", response);
       return {
         totalL2Tags: dataToSend.length,
         success: true,
@@ -62,21 +88,19 @@ const postL2Tags = async (url, dataToSend = []) => {
   }
 };
 
-const attachNewL2TagsWithL1Tags = async (currentlyFetchedL1Tags = []) => {
+const attachNewL2TagsWithL1Tags = async (l2tags, currentlyFetchedL1Tags = []) => {
   // console.log(
   //   colors.bold.bgRed.yellow(
   //     "second .... wait... attaching the Level tags with their parent IDs...."
   //   )
   // );
-  const resolveNewL2Tags = await newL2Tags;
   const l2TagsWithParentId = [];
-  resolveNewL2Tags &&
-    resolveNewL2Tags.forEach((x, idx) => {
+  l2tags && l2tags.forEach((x, idx) => {
       currentlyFetchedL1Tags.forEach((y, yidx) => {
-        x[2].trim().toLowerCase() === y.name.trim().toLowerCase() &&
+        x[0].trim().toLowerCase() === y.name.trim().toLowerCase() &&
           l2TagsWithParentId.push({
             type: "LEVEL2",
-            name: x[3],
+            name: x[1],
             parentId: y.id,
           });
       });
@@ -100,7 +124,9 @@ const work = async () => {
       // console.log(
       //   colors.bold.bgCyan.red("fetched l1 tags", data.LEVEL1.length)
       // );
-      const l2TagsReadyToSend = await attachNewL2TagsWithL1Tags(data.LEVEL1);
+      const exisitingL2Tags = await getL2Tags(L2TagsUrl);
+      const verifiedNewL2Tags = await verifyL2Tags(exisitingL2Tags.data.LEVEL2)
+      const l2TagsReadyToSend = await attachNewL2TagsWithL1Tags(verifiedNewL2Tags, data.LEVEL1);
       const { totalL2Tags, success, errorMessage } = await postL2Tags(
         postL2TagsUrl,
         l2TagsReadyToSend
@@ -111,7 +137,7 @@ const work = async () => {
         //   errorMessage
         // );
       } else {
-        console.log("you successfully posted ", totalL2Tags, " Level-2 tags");
+        console.log("you successfully posted ", totalL2Tags.length, " Level-2 tags");
       }
     }
     // console.log(colors.bgBlue.yellow(".... program ends ...."));

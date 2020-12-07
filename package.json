@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "post-level1": "node level1.js",
-    "post-level2": "node level2.js"
+    "l1": "node level1.js",
+    "l2": "node level2.js"
   },
   "author": "Divyesh Parmar",
   "license": "MIT",
