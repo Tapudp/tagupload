@@ -1,13 +1,13 @@
 const xlsxFile = require('read-excel-file/node');
 const colors = require('colors');
 const fetch = require('node-fetch');
-const L0TagsUrl = 'https://test-bff.airmeet.com/api/v1/tag/?tagType=LEVEL0';
-const L1TagsUrl = 'https://test-bff.airmeet.com/api/v1/tag/?tagType=LEVEL1';
-const postL1TagsUrl = 'https://test-bff.airmeet.com/api/v1/tag';
+const L0TagsUrl = 'https://veldanda.airmeet.com/api/v1/tag/?tagType=LEVEL0';
+const L1TagsUrl = 'https://veldanda.airmeet.com/api/v1/tag/?tagType=LEVEL1';
+const postL1TagsUrl = 'https://veldanda.airmeet.com/api/v1/tag';
 
 // the logic for reading Excel sheet
-// let newL2Tags = xlsxFile('../newtags.xlsx', { sheet: 'Level2' }).then((rows) => rows);
-let newL1Tags = xlsxFile('../newtags.xlsx', { sheet: 'Sheet5' }).then(
+// let newL2Tags = xlsxFile('./newtags.xlsx', { sheet: 'Level2' }).then((rows) => rows);
+let newL1Tags = xlsxFile('./newtags.xlsx', { sheet: 'Level1' }).then(
   (rows) => rows,
   (err) => console.warn(err)
 );
@@ -46,11 +46,18 @@ const verifyL1Tags = async (existingL1Tags) => {
 
 const postL1Tags = async (url, dataToSend = []) => {
   console.log('third ... wait ... posting the Level-1 tags ... ');
-
+  console.log(dataToSend.length)
   try {
-    const response = await fetch(url, { method: 'POST', body: dataToSend });
+    const response = await fetch(url, { method: 'POST',
+      body: JSON.stringify(dataToSend),
+      headers:{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'x-accesstoken': 'veldanda'
+     } 
+  });
     if (response.status === 200) {
-      // response.headers.forEach((header) => console.log('hit the bff api', header));
+      // response.headers.forEach((header) => console.log('hit the veldanda api', header));
       console.log('response is ', response);
       return { totalL1Tags: dataToSend.length, success: true, errorMessage: undefined };
     } else {
@@ -68,7 +75,7 @@ const attachNewL1TagsWithL0Tags = async (l1Tags, currentlyFetchedL0Tags = []) =>
   l1Tags.forEach((x, idx) => {
     currentlyFetchedL0Tags.forEach((y, yidx) => {
       x[1].trim().toLowerCase() === y.name.trim().toLowerCase() &&
-        l1TagsWithParentId.push({ type: x[0], name: x[2], parentId: y.id });
+        l1TagsWithParentId.push({ type: 'LEVEL1', name: x[2], parentId: y.id });
     });
   });
   console.table(l1TagsWithParentId);
