@@ -2,8 +2,8 @@ const xlsxFile = require("read-excel-file/node");
 const fetch = require("node-fetch");
 const colors = require("colors");
 const L1TagsUrl = "https://bff.airmeet.com/api/v1/tag/?tagType=LEVEL1";
-const L2TagsUrl = 'https://test-bff-2.airmeet.com/api/v1/tag/?tagType=LEVEL2';
-const postL2TagsUrl = "https://test-bff-2.airmeet.com/api/v1/tag";
+const L2TagsUrl = "https://bff.airmeet.com/api/v1/tag/?tagType=LEVEL2";
+const postL2TagsUrl = "https://bff.airmeet.com/api/v1/tag";
 
 // the logic for reading Excel sheet
 let newL2Tags = xlsxFile("./newtags.xlsx", { sheet: "Sheet6" }).then(
@@ -46,11 +46,14 @@ const getL2Tags = async (url) => {
 
 const verifyL2Tags = async (existingL2Tags) => {
   let pureNewL2Tags = await newL2Tags;
-  pureNewL2Tags = pureNewL2Tags.filter(it => it[1] !== null);
-  // console.log('before verify', pureNewL2Tags)
+  pureNewL2Tags = pureNewL2Tags.filter((it) => it[1] !== null);
   existingL2Tags.forEach((e) => {
-    pureNewL2Tags.filter((it) => it[1] !== e.name);
+    pureNewL2Tags = pureNewL2Tags.filter(
+      (it) => it[1].toLowerCase().trim() !== e.name.toLowerCase().trim()
+    );
   });
+  console.table(existingL2Tags);
+  console.log(pureNewL2Tags);
   return pureNewL2Tags;
 };
 
@@ -58,16 +61,16 @@ const postL2Tags = async (url, dataToSend = []) => {
   // console.log(
   //   colors.bold.bgRed.yellow("third ... wait ... posting the Level-2 tags ... ")
   // );
-  // console.log(dataToSend);
+  console.log(dataToSend.length);
   try {
-      const response = await fetch(url, { method: 'POST',
-        body: JSON.stringify(dataToSend),
-        headers:{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'x-accesstoken': 'veldanda'
-       }
-    });
+    //   const response = await fetch(url, { method: 'POST',
+    //     body: JSON.stringify(dataToSend),
+    //     headers:{
+    //     'Content-Type': 'application/json',
+    //     'Accept': 'application/json',
+    //     'x-accesstoken': 'veldanda'
+    //    }
+    // });
     console.log("response is ", response);
     if (response.status === 200) {
       // response.headers.forEach((header) => console.log('hit the bff api', header));
@@ -88,14 +91,18 @@ const postL2Tags = async (url, dataToSend = []) => {
   }
 };
 
-const attachNewL2TagsWithL1Tags = async (l2tags, currentlyFetchedL1Tags = []) => {
+const attachNewL2TagsWithL1Tags = async (
+  l2tags,
+  currentlyFetchedL1Tags = []
+) => {
   // console.log(
   //   colors.bold.bgRed.yellow(
   //     "second .... wait... attaching the Level tags with their parent IDs...."
   //   )
   // );
   const l2TagsWithParentId = [];
-  l2tags && l2tags.forEach((x, idx) => {
+  l2tags &&
+    l2tags.forEach((x, idx) => {
       currentlyFetchedL1Tags.forEach((y, yidx) => {
         x[0].trim().toLowerCase() === y.name.trim().toLowerCase() &&
           l2TagsWithParentId.push({
@@ -125,8 +132,11 @@ const work = async () => {
       //   colors.bold.bgCyan.red("fetched l1 tags", data.LEVEL1.length)
       // );
       const exisitingL2Tags = await getL2Tags(L2TagsUrl);
-      const verifiedNewL2Tags = await verifyL2Tags(exisitingL2Tags.data.LEVEL2)
-      const l2TagsReadyToSend = await attachNewL2TagsWithL1Tags(verifiedNewL2Tags, data.LEVEL1);
+      const verifiedNewL2Tags = await verifyL2Tags(exisitingL2Tags.data.LEVEL2);
+      const l2TagsReadyToSend = await attachNewL2TagsWithL1Tags(
+        verifiedNewL2Tags,
+        data.LEVEL1
+      );
       const { totalL2Tags, success, errorMessage } = await postL2Tags(
         postL2TagsUrl,
         l2TagsReadyToSend
@@ -137,7 +147,11 @@ const work = async () => {
         //   errorMessage
         // );
       } else {
-        console.log("you successfully posted ", totalL2Tags.length, " Level-2 tags");
+        console.log(
+          "you successfully posted ",
+          totalL2Tags.length,
+          " Level-2 tags"
+        );
       }
     }
     // console.log(colors.bgBlue.yellow(".... program ends ...."));
