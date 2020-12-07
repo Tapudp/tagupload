@@ -52,8 +52,6 @@ const verifyL2Tags = async (existingL2Tags) => {
       (it) => it[1].toLowerCase().trim() !== e.name.toLowerCase().trim()
     );
   });
-  console.table(existingL2Tags);
-  console.log(pureNewL2Tags);
   return pureNewL2Tags;
 };
 
@@ -63,14 +61,14 @@ const postL2Tags = async (url, dataToSend = []) => {
   // );
   console.log(dataToSend.length);
   try {
-    //   const response = await fetch(url, { method: 'POST',
-    //     body: JSON.stringify(dataToSend),
-    //     headers:{
-    //     'Content-Type': 'application/json',
-    //     'Accept': 'application/json',
-    //     'x-accesstoken': 'veldanda'
-    //    }
-    // });
+      const response = await fetch(url, { method: 'POST',
+        body: JSON.stringify(dataToSend),
+        headers:{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'x-accesstoken': 'veldanda'
+       }
+    });
     console.log("response is ", response);
     if (response.status === 200) {
       // response.headers.forEach((header) => console.log('hit the bff api', header));

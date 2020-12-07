@@ -48,6 +48,8 @@ const verifyL1Tags = async (existingL1Tags) => {
       (it) => it[1].toLowerCase().trim() !== e.name.toLowerCase().trim()
     );
   });
+  console.table(existingL1Tags);
+  console.table(pureNewL1Tags);
   return pureNewL1Tags;
 };
 
@@ -55,14 +57,14 @@ const postL1Tags = async (url, dataToSend = []) => {
   console.log("third ... wait ... posting the Level-1 tags ... ");
   console.log(dataToSend.length);
   try {
-    //   const response = await fetch(url, { method: 'POST',
-    //     body: JSON.stringify(dataToSend),
-    //     headers:{
-    //     'Content-Type': 'application/json',
-    //     'Accept': 'application/json',
-    //     'x-accesstoken': 'veldanda'
-    //    }
-    // });
+      const response = await fetch(url, { method: 'POST',
+        body: JSON.stringify(dataToSend),
+        headers:{
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'x-accesstoken': 'veldanda'
+       }
+    });
     if (response.status === 200) {
       // response.headers.forEach((header) => console.log('hit the veldanda api', header));
       console.log("response is ", response);
@@ -90,8 +92,6 @@ const attachNewL1TagsWithL0Tags = async (
   console.log(
     "second .... wait... attaching the Level tags with their parent IDs...."
   );
-  console.table(l1Tags);
-  console.table(currentlyFetchedL0Tags);
   // const resolveNewL1Tags = l1Tags;
   const l1TagsWithParentId = [];
 
